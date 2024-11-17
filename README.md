@@ -16,6 +16,13 @@ using Pkg
 Pkg.add("PermuteArgs")
 ```
 
+## Features
+
+- Supports both multi-line and one-line function definitions
+- Handles keyword arguments
+- Maintains type safety
+- Generates all possible permutations of argument orders
+
 ## Usage
 
 ### Using the Macro
@@ -41,16 +48,16 @@ The `permute_args` function creates a new function that accepts permuted argumen
 
 ```julia
 # Define base function
-function test(x::Int, y::String)
+function base_func(x::Int, y::String)
     return "x=$x, y=$y"
 end
 
 # Create permutable version
-perm_test = permute_args(test, [Int, String])
+permuted_func = permute_args(base_func, [Int, String])
 
 # Call with different argument orders
-perm_test(42, "hello")      # Returns: "x=42, y=hello"
-perm_test("hello", 42)      # Returns: "x=42, y=hello"
+permuted_func(42, "hello")      # Returns: "x=42, y=hello"
+permuted_func("hello", 42)      # Returns: "x=42, y=hello"
 ```
 
 ### Modifying Existing Functions
@@ -76,17 +83,17 @@ test("hello", 42)      # Returns: "x=42, y=hello"
 The macro also supports functions with keyword arguments:
 
 ```julia
-@permute_args function test_func_kw(x::Int, y::String; z::Float64=3.14)
+@permute_args function keyword_func(x::Int, y::String; z::Float64=3.14)
     return "x=$x, y=$y, z=$z"
 end
 
 # Call with default keyword argument
-test_func_kw(42, "hello")                 # Returns: "x=42, y=hello, z=3.14"
-test_func_kw("hello", 42)                 # Returns: "x=42, y=hello, z=3.14"
+keyword_func(42, "hello")                 # Returns: "x=42, y=hello, z=3.14"
+keyword_func("hello", 42)                 # Returns: "x=42, y=hello, z=3.14"
 
 # Call with specified keyword argument
-test_func_kw(42, "hello", z=2.71)         # Returns: "x=42, y=hello, z=2.71"
-test_func_kw("hello", 42, z=2.71)         # Returns: "x=42, y=hello, z=2.71"
+keyword_func(42, "hello", z=2.71)         # Returns: "x=42, y=hello, z=2.71"
+keyword_func("hello", 42, z=2.71)         # Returns: "x=42, y=hello, z=2.71"
 ```
 
 ### One-line Function Definitions
@@ -94,15 +101,8 @@ test_func_kw("hello", 42, z=2.71)         # Returns: "x=42, y=hello, z=2.71"
 The macro works with both multi-line and one-line function definitions:
 
 ```julia
-@permute_args test_func_one_line(x::Int, y::String) = "x=$x, y=$y"
+@permute_args one_line_func(x::Int, y::String) = "x=$x, y=$y"
 ```
-
-## Features
-
-- Supports both multi-line and one-line function definitions
-- Handles keyword arguments
-- Maintains type safety
-- Generates all possible permutations of argument orders
 
 ## Error Handling
 
@@ -111,3 +111,4 @@ The package maintains Julia's type safety. Attempting to call a function with in
 ```julia
 test_func(1.0, "hello")      # Throws MethodError: wrong type for x
 test_func("hello", "world")  # Throws MethodError: wrong type for y
+```
