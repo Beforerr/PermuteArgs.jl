@@ -68,7 +68,7 @@ test(42, "hello")      # Returns: "x=42, y=hello"
 test("hello", 42)      # Returns: "x=42, y=hello"
 ```
 
-Note: This function modifies the global method table. Use with caution in production code.
+Note: This function modifies the method table. Use with caution in production code.
 """
 function permute_args!(f::Function, types::Vector{<:Type})
     # Get the method with matching number of arguments
@@ -78,8 +78,12 @@ function permute_args!(f::Function, types::Vector{<:Type})
 
     isempty(matching_methods) && throw(ArgumentError("No method found matching the number of types provided"))
 
-    # Get the original method
-    orig_method = first(matching_methods)
+    # Get the original method and its module
+    method = first(matching_methods)
+    func_module = method.module
+
+    # Get the original function name from the method
+    fsym = nameof(f)
 
     # Extract the function body using the original method
     for p in permutations(1:length(types))
@@ -92,10 +96,12 @@ function permute_args!(f::Function, types::Vector{<:Type})
         # Create the argument list for the original function call
         call_args = [Symbol(:x, findfirst(==(i), p)) for i in 1:length(types)]
 
-        # Define the new method
-        @eval function $f($(new_args...))
-            $f($(call_args...))
-        end
+        # Define the new method in the original module
+        Core.eval(func_module, quote
+            function $fsym($(new_args...))
+                $fsym($(call_args...))
+            end
+        end)
     end
 
     return f
