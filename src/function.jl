@@ -29,7 +29,7 @@ function permute_args(m::Method)
 end
 
 """
-    permute_args(f::Function, types::Vector{<:Type})
+    permute_args(f, types)
 
 Create multiple method definitions for function `f` allowing arbitrary argument order based on types.
 Returns a new function with all permuted method definitions.
@@ -49,13 +49,9 @@ perm_test(42, "hello")      # Returns: "x=42, y=hello"
 perm_test("hello", 42)      # Returns: "x=42, y=hello"
 ```
 """
-function permute_args(f::Function, types::Vector{<:Type})
-    # Get the method with matching number of arguments
-    matching_methods = filter(methods(f)) do m
-        length(m.sig.parameters) - 1 == length(types)
-    end
-
-    isempty(matching_methods) && throw(ArgumentError("No method found matching the number of types provided"))
+function permute_args(@nospecialize(f), types)
+    # Check if the method with the given types exists
+    which(f, types)
 
     # Create new function to hold all permuted methods
     new_f = function (args...)
@@ -78,7 +74,7 @@ function permute_args(f::Function, types::Vector{<:Type})
 end
 
 """
-    permute_args!(f::Function, types::Vector{<:Type})
+    permute_args!(f, types)
 
 Add permuted method definitions to an existing function `f` based on the provided types.
 This function mutates the method table of `f` by adding new methods that handle permuted arguments.
@@ -100,17 +96,9 @@ test("hello", 42)      # Returns: "x=42, y=hello"
 
 Note: This function modifies the method table. Use with caution in production code.
 """
-function permute_args!(f::Function, types::Vector{<:Type})
-    # Get the method with matching number of arguments
-    matching_methods = filter(methods(f)) do m
-        length(m.sig.parameters) - 1 == length(types)
-    end
-
-    isempty(matching_methods) && throw(ArgumentError("No method found matching the number of types provided"))
-
+function permute_args!(@nospecialize(f), types)
     # Get the original method and its module
-    method = first(matching_methods)
-    func_module = method.module
+    method = which(f, types)
 
     # Get the original function name from the method
     fsym = nameof(f)
@@ -127,7 +115,7 @@ function permute_args!(f::Function, types::Vector{<:Type})
         call_args = [Symbol(:x, findfirst(==(i), p)) for i in 1:length(types)]
 
         # Define the new method in the original module
-        Core.eval(func_module, quote
+        method.module.eval(quote
             function $fsym($(new_args...))
                 $fsym($(call_args...))
             end
