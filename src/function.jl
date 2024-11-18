@@ -29,10 +29,11 @@ function permute_args(m::Method)
 end
 
 """
-    permute_args(f, types)
+    permute_args(f[, types])
 
-Create multiple method definitions for function `f` allowing arbitrary argument order based on types.
-Returns a new function with all permuted method definitions.
+Returns a new function for function `f` allowing arbitrary argument order based on the provided types.
+
+If `types` are not provided, the first method of `f` is used.
 
 # Examples
 ```julia
@@ -51,7 +52,7 @@ perm_test("hello", 42)      # Returns: "x=42, y=hello"
 """
 function permute_args(@nospecialize(f), types)
     # Check if the method with the given types exists
-    which(f, types)
+    # which(f, types)
 
     # Create new function to hold all permuted methods
     new_f = function (args...)
@@ -71,6 +72,13 @@ function permute_args(@nospecialize(f), types)
     end
 
     return new_f
+end
+
+function permute_args(@nospecialize(f))
+    ms = methods(f)
+    isempty(ms) && throw(ArgumentError("No methods found for function $f"))
+    types = ms[1].sig.parameters[2:end]
+    return permute_args(f, types)
 end
 
 """

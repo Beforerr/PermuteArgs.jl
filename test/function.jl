@@ -24,6 +24,14 @@ using Test, PermuteArgs
     @test_throws ArgumentError permuted_func(42, "hello", 3.14)
 end
 
+@testset "Basic usage with no types specified" begin
+    function base_func(x::Int, y::String)
+        return "x=$x, y=$y"
+    end
+    permuted_func = permute_args(base_func)
+    @test permuted_func(42, "hello") == permuted_func("hello", 42) == base_func(42, "hello")
+end
+
 function test_func_for_method(x::Int, y::Float64, z::String)
     return "x=$x, y=$y, z=$z"
 end
