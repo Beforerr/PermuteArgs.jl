@@ -60,6 +60,12 @@ permuted_func(42, "hello")      # Returns: "x=42, y=hello"
 permuted_func("hello", 42)      # Returns: "x=42, y=hello"
 ```
 
+Type arguments can be omitted and the first method of the function will be used instead.
+
+```julia
+permuted_func = permute_args(base_func)
+```
+
 ### Modifying Existing Functions
 
 The `permute_args!` function adds permuted methods to an existing function:
