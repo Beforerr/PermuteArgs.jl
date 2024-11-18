@@ -1,4 +1,34 @@
 """
+    permute_args(m::Method)
+
+Create a new function that allows arbitrary argument order based on the method signature.
+"""
+function permute_args(m::Method)
+
+    types = m.sig.parameters[2:end]
+    func = m.module.eval(m.name)
+
+    # Create new function to hold all permuted methods
+    new_f = function (args...)
+        # Check number of arguments
+        length(args) == length(types) || throw(ArgumentError("Wrong number of arguments"))
+
+        # Find matching permutation
+        for p in permutations(1:length(types))
+            if all(i -> args[i] isa types[p[i]], 1:length(types))
+                # Reorder arguments according to permutation
+                ordered_args = [args[findfirst(==(i), p)] for i in 1:length(types)]
+                return func(ordered_args...)
+            end
+        end
+
+        throw(MethodError(m, typeof.(args)))
+    end
+
+    return new_f
+end
+
+"""
     permute_args(f::Function, types::Vector{<:Type})
 
 Create multiple method definitions for function `f` allowing arbitrary argument order based on types.

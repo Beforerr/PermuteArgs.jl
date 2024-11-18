@@ -1,3 +1,5 @@
+using Test, PermuteArgs
+
 @testset "Basic usage" begin
     # Define base function
     function base_func(x::Int, y::String)
@@ -20,4 +22,17 @@
     # Test wrong number of arguments
     @test_throws ArgumentError permuted_func(42)
     @test_throws ArgumentError permuted_func(42, "hello", 3.14)
+end
+
+function test_func_for_method(x::Int, y::Float64, z::String)
+    return "x=$x, y=$y, z=$z"
+end
+
+@testset "Method usage" begin
+    method = methods(test_func_for_method)[1]
+    permuted_func = permute_args(method)
+
+    @test permuted_func(42, 3.14, "hello") ==
+          permuted_func("hello", 42, 3.14) ==
+          test_func_for_method(42, 3.14, "hello")
 end
