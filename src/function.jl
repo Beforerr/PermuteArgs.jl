@@ -5,8 +5,8 @@ Create a new function that allows arbitrary argument order based on the method s
 """
 function permute_args(m::Method)
 
-    types = m.sig.parameters[2:end]
-    func = m.module.eval(m.name)
+    types = m.sig.types[2:end]
+    func = m.sig.types[1].instance
 
     # Create new function to hold all permuted methods
     new_f = function (args...)
@@ -51,34 +51,13 @@ perm_test("hello", 42)      # Returns: "x=42, y=hello"
 ```
 """
 function permute_args(@nospecialize(f), types)
-    # Check if the method with the given types exists
-    # which(f, types)
-
-    # Create new function to hold all permuted methods
-    new_f = function (args...)
-        # Check number of arguments
-        length(args) == length(types) || throw(ArgumentError("Wrong number of arguments"))
-
-        # Find matching permutation
-        for p in permutations(1:length(types))
-            if all(i -> args[i] isa types[p[i]], 1:length(types))
-                # Reorder arguments according to permutation
-                ordered_args = [args[findfirst(==(i), p)] for i in 1:length(types)]
-                return f(ordered_args...)
-            end
-        end
-
-        throw(MethodError(f, typeof.(args)))
-    end
-
-    return new_f
+    method = which(f, types)
+    return permute_args(method)
 end
 
 function permute_args(@nospecialize(f))
     ms = methods(f)
-    isempty(ms) && throw(ArgumentError("No methods found for function $f"))
-    types = ms[1].sig.parameters[2:end]
-    return permute_args(f, types)
+    return permute_args(ms[1])
 end
 
 """
