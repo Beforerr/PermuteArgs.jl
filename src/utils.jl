@@ -10,3 +10,5 @@ function get_method_argnames(m::Method)
     start_idx = m.sig.types[1] <: Function ? 2 : 1
     return argnames[start_idx:end]
 end
+
+get_method_argtypes(m::Method) = m.sig.types[2:end]

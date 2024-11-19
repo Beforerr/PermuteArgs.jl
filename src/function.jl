@@ -1,3 +1,15 @@
+function generate_permuted_methods(m::Method; perms=nothing)
+    # Extract the original function and its signature types
+    func_name = m.name
+    arg_names = get_method_argnames(m)
+    arg_types = get_method_argtypes(m)
+
+    func = m.sig.types[1].instance
+    func_body = Expr(:call, func, arg_names...)
+
+    return generate_permuted_methods(func_name, arg_names, arg_types, func_body; perms=perms)
+end
+
 """
     permute_args(m::Method; mod=nothing)
 
@@ -6,27 +18,8 @@ Create a new function that allows arbitrary argument order based on the method s
 If `mod` is not provided, the new function is defined in an anonymous module.
 """
 function permute_args(m::Method; mod=nothing)
-    # Extract the original function and its signature types
     mod = something(mod, Module())
-    sig, fname = m.sig, m.name
-    func = m.sig.types[1].instance
-    types = sig.types[2:end]  # Exclude the function type itself
-    n = length(types)
-
-    methods = Expr[]
-    for p in permutations(1:n)
-        inv_perm = inverse_permutation(p)
-        argnames = get_method_argnames(m)
-        new_args = [:($(argnames[i])::$(types[p[i]])) for i in 1:n]
-        reordered_args = [:($(argnames[inv_perm[i]])) for i in 1:n]
-
-        # Define the new method with permuted argument types
-        new_call = Expr(:call, fname, new_args...)
-        func_body = Expr(:call, func, reordered_args...)
-        method = Expr(:function, new_call, func_body)
-        push!(methods, method)
-    end
-
+    methods = generate_permuted_methods(m)
     return Base.eval(mod, Expr(:block, methods...))
 end
 
@@ -124,28 +117,7 @@ Note: This function modifies the method table. Use with caution in production co
 function permute_args!(@nospecialize(f), types)
     # Get the original method and its module
     method = which(f, types)
-
-    # Get the original function name from the method
-    fsym = nameof(f)
-
-    # Extract the function body using the original method
-    for p in permutations(1:length(types))
-        # Skip the original order
-        all(i -> i == p[i], 1:length(p)) && continue
-
-        # Create new argument list with permuted types
-        new_args = [:($(Symbol(:x, i))::$(types[p[i]])) for i in 1:length(types)]
-
-        # Create the argument list for the original function call
-        call_args = [Symbol(:x, findfirst(==(i), p)) for i in 1:length(types)]
-
-        # Define the new method in the original module
-        method.module.eval(quote
-            function $fsym($(new_args...))
-                $fsym($(call_args...))
-            end
-        end)
-    end
-
-    return f
+    perms = collect(permutations(1:length(types)))[2:end]
+    methods = generate_permuted_methods(method; perms)
+    return Base.eval(method.module, Expr(:block, methods...))
 end
