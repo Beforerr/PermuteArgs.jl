@@ -9,7 +9,7 @@ end
     return x + length(y) + z
 end
 
-permuted_func = permute_args(base_func)
+const permuted_func = permute_args(base_func)
 
 @b base_func(42, "hello", 3.14)
 
