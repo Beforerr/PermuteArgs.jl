@@ -20,8 +20,8 @@ using Test, PermuteArgs
     @test_throws MethodError permuted_func("hello", "world")
 
     # Test wrong number of arguments
-    @test_throws ArgumentError permuted_func(42)
-    @test_throws ArgumentError permuted_func(42, "hello", 3.14)
+    @test_throws MethodError permuted_func(42)
+    @test_throws MethodError permuted_func(42, "hello", 3.14)
 end
 
 @testset "Basic usage with no types specified" begin
