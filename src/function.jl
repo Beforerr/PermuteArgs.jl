@@ -1,11 +1,44 @@
-inverse_p(p) = ntuple(i -> findfirst(==(i), p), length(p))
-
 """
-    permute_args(m::Method)
+    permute_args(m::Method; mod=nothing)
 
 Create a new function that allows arbitrary argument order based on the method signature.
+
+If `mod` is not provided, the new function is defined in an anonymous module.
 """
-function permute_args(m::Method)
+function permute_args(m::Method; mod=nothing)
+    # Extract the original function and its signature types
+    mod = something(mod, Module())
+    sig, fname = m.sig, m.name
+    func = m.sig.types[1].instance
+    types = sig.types[2:end]  # Exclude the function type itself
+    n = length(types)
+
+    methods = Expr[]
+    for p in permutations(1:n)
+        inv_perm = inverse_permutation(p)
+
+        args = [Symbol("arg$(i)") for i in 1:n]
+        typed_args = [:($(args[i])::$(types[p[i]])) for i in 1:n]
+        reordered_args = [:($(args[inv_perm[i]])) for i in 1:n]
+
+        # Define the new method with permuted argument types
+        new_call = Expr(:call, fname, typed_args...)
+        func_body = Expr(:call, func, reordered_args...)
+        method = Expr(:function, new_call, func_body)
+        push!(methods, method)
+    end
+
+    return Base.eval(mod, Expr(:block, methods...))
+end
+
+"""
+    permute_args_dynamic(m::Method)
+
+Create a new function that allows arbitrary argument order based on the method signature.
+
+This returned function is not type-stable and internally uses a lookup table to reorder arguments.
+"""
+function permute_args_dynamic(m::Method)
     types = m.sig.types[2:end]
     func = m.sig.types[1].instance
     n = length(types)
@@ -13,7 +46,7 @@ function permute_args(m::Method)
     # Precompute all permutations and their inverse mappings
     perms = permutations(1:n)
     # Create a lookup dictionary for each permutation
-    perm_lookups = Tuple((types[p], inverse_p(p)) for p in perms)
+    perm_lookups = Tuple((types[p], inverse_permutation(p)) for p in perms)
 
     # Create new function with type-stable internals
     new_fund_ex = quote

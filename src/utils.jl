@@ -1,0 +1,1 @@
+inverse_permutation(p) = ntuple(i -> findfirst(==(i), p), length(p))
