@@ -7,6 +7,8 @@ A Julia package that provides tools for creating functions with permutable argum
 - `permute_args`: Function to create a new function with permutable arguments
 - `permute_args!`: Function to add permuted methods to an existing function
 
+`@permute_args` is recommended over `permute_args` and `permute_args!` as it comes with no runtime overhead.
+
 ## Installation
 
 You can install PermuteArgs using Julia's package manager:
