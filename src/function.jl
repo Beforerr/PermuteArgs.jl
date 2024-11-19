@@ -16,13 +16,12 @@ function permute_args(m::Method; mod=nothing)
     methods = Expr[]
     for p in permutations(1:n)
         inv_perm = inverse_permutation(p)
-
-        args = [Symbol("arg$(i)") for i in 1:n]
-        typed_args = [:($(args[i])::$(types[p[i]])) for i in 1:n]
-        reordered_args = [:($(args[inv_perm[i]])) for i in 1:n]
+        argnames = get_method_argnames(m)
+        new_args = [:($(argnames[i])::$(types[p[i]])) for i in 1:n]
+        reordered_args = [:($(argnames[inv_perm[i]])) for i in 1:n]
 
         # Define the new method with permuted argument types
-        new_call = Expr(:call, fname, typed_args...)
+        new_call = Expr(:call, fname, new_args...)
         func_body = Expr(:call, func, reordered_args...)
         method = Expr(:function, new_call, func_body)
         push!(methods, method)
