@@ -1,13 +1,17 @@
+function generate_permuted_methods(f::Function; types=nothing, perms=nothing)
+    func_name, (arg_names, arg_types), _ = parse_function_signature(f; types)
+    kw_args = Expr(:parameters, :(kw...))
+    func_body = Expr(:call, f, kw_args, arg_names...)
+    return generate_permuted_methods(func_name, arg_names, arg_types, func_body; perms, kw_args)
+end
+
 function generate_permuted_methods(m::Method; perms=nothing)
     # Extract the original function and its signature types
-    func_name = m.name
-    arg_names = get_method_argnames(m)
-    arg_types = get_method_argtypes(m)
-
-    func = m.sig.types[1].instance
-    func_body = Expr(:call, func, arg_names...)
-
-    return generate_permuted_methods(func_name, arg_names, arg_types, func_body; perms=perms)
+    func_name, (arg_names, arg_types), _ = parse_function_signature(m)
+    func = get_method_func(m)
+    kw_args = Expr(:parameters, :(kw...))
+    func_body = Expr(:call, func, kw_args, arg_names...)
+    return generate_permuted_methods(func_name, arg_names, arg_types, func_body; perms, kw_args)
 end
 
 """
@@ -81,15 +85,13 @@ perm_test(42, "hello")      # Returns: "x=42, y=hello"
 perm_test("hello", 42)      # Returns: "x=42, y=hello"
 ```
 """
-function permute_args(@nospecialize(f), types)
-    method = which(f, types)
-    return permute_args(method)
+function permute_args(@nospecialize(f); types=nothing)
+    methods = generate_permuted_methods(f; types)
+    return Base.eval(Module(), Expr(:block, methods...))
 end
 
-function permute_args(@nospecialize(f))
-    ms = methods(f)
-    return permute_args(ms[1])
-end
+permute_args(@nospecialize(f), types) = permute_args(f; types)
+
 
 """
     permute_args!(f, types)

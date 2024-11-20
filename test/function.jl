@@ -24,6 +24,12 @@ using Test, PermuteArgs
     @test_throws MethodError permuted_func(42, "hello", 3.14)
 end
 
+@testset "Function with keyword arguments" begin
+    base_func(x::Int, y::String; z::Float64=3.14) = "x=$x, y=$y, z=$z"
+    permuted_func = permute_args(base_func)
+    @test permuted_func("hello", 42; z=1.0) == permuted_func(42, "hello"; z=1.0) == base_func(42, "hello"; z=1.0)
+end
+
 @testset "Basic usage with no types specified" begin
     function base_func(x::Int, y::String)
         return "x=$x, y=$y"
