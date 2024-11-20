@@ -6,7 +6,6 @@ function generate_permuted_methods(f::Function; types=nothing, perms=nothing)
 end
 
 function generate_permuted_methods(m::Method; perms=nothing)
-    # Extract the original function and its signature types
     func_name, (arg_names, arg_types), _ = parse_function_signature(m)
     func = get_method_func(m)
     kw_args = Expr(:parameters, :(kw...))
@@ -81,9 +80,8 @@ test("hello", 42)      # Returns: "x=42, y=hello"
 Note: This function modifies the method table. Use with caution in production code.
 """
 function permute_args!(@nospecialize(f), types)
-    # Get the original method and its module
-    method = which(f, types)
     perms = collect(permutations(1:length(types)))[2:end]
-    methods = generate_permuted_methods(method; perms)
-    return Base.eval(method.module, Expr(:block, methods...))
+    methods = generate_permuted_methods(f; types, perms)
+    mod = parentmodule(f, types)
+    return Base.eval(mod, Expr(:block, methods...))
 end

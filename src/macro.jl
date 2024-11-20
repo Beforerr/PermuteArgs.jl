@@ -1,33 +1,8 @@
 """
-    parse_function_signature(expr::Expr)
-
-Helper function to extract function name, arguments, and keyword arguments from a function definition expression.
-"""
-function parse_func_sig(expr::Expr)
-    args = expr.args
-    func_name = args[1]
-    # Handle keyword arguments if present
-    if args[2].head == :parameters
-        param_expr = args[2]
-        arg_exprs = args[3:end]
-    else
-        param_expr = nothing
-        arg_exprs = args[2:end]
-    end
-    return func_name, arg_exprs, param_expr
-end
-
-function parse_args(args)
-    arg_names = [arg.args[1] for arg in args]
-    arg_types = [arg.args[2] for arg in args]
-    return arg_names, arg_types
-end
-
-
-"""
     @permute_args function_name((arg1, Type1), (arg2, Type2), ...)
 
 Generate multiple method definitions allowing arbitrary argument order based on types.
+
 Supports both multi-line function definitions and one-line function definitions with keyword arguments.
 
 # Examples
@@ -52,13 +27,9 @@ macro permute_args(expr)
     func_body = expr.args[2]
 
     # Extract function name and arguments
-    func_name, args, kw_args = parse_func_sig(func_sig)
-    # Get argument names and types
-    arg_names, arg_types = parse_args(args)
+    func_name, args, kw_args = parse_function_signature(func_sig)
 
     # Generate all methods using the shared helper function
-    methods = generate_permuted_methods(func_name, arg_names, arg_types, func_body; kw_args)
-
-    # Return a block containing all generated functions
+    methods = generate_permuted_methods(func_name, args..., func_body; kw_args)
     return Expr(:block, methods...) |> esc
 end
