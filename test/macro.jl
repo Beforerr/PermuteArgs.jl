@@ -30,3 +30,26 @@ end
     @test subtype_func(42.0, 3) == "x=3, y=42.0"
     @test_throws MethodError subtype_func(42, 3)
 end
+
+@testset "Struct field permutations" begin
+    @permute_args struct Point
+        x::Int
+        y::Float64
+        label::String
+    end
+
+    # Test regular constructor with original field order
+    p1 = Point(1, 2.0, "A")
+    @test p1.x == 1
+    @test p1.y == 2.0
+    @test p1.label == "A"
+
+    # Test permuted field order and keyword constructor
+    p2 = Point("A", 2.0, 1)
+    p3 = Point(label="A", y=2.0, x=1)
+    @test p3 == p2 == p1
+
+    # Test type errors
+    @test_throws MethodError Point("D", "E", 1.0)
+    @test_throws MethodError Point(1.0, "D", 2.0)
+end

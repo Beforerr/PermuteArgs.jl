@@ -60,3 +60,16 @@ function parse_function_signature(f::Function; types=nothing)
     kw_args = method_kwargs(m)
     return func_name, args, kw_args
 end
+
+function split_struct_body(expr)
+    # Extract field names and types
+    field_names = []
+    field_types = []
+    for field in expr.args
+        if field isa Expr && field.head == :(::)
+            push!(field_names, field.args[1])
+            push!(field_types, field.args[2])
+        end
+    end
+    return field_names, field_types
+end
