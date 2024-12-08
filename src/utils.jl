@@ -21,13 +21,6 @@ function parse_function_signature(expr::Expr)
     return func_name, arg_exprs, param_expr
 end
 
-function parse_args(args)
-    arg_names = [arg.args[1] for arg in args]
-    arg_types = [arg.args[2] for arg in args]
-    return arg_names, arg_types
-end
-
-
 method_argnames(m::Method) = Base.method_argnames(m)[2:end]
 method_argtypes(m::Method) = m.sig.types[2:end]
 method_args(m::Method) = (method_argnames(m), method_argtypes(m))

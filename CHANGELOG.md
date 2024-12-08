@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Refactor
+
+- Use JLCall to generate call expr, which is a more robust way
+
 ## [1.2.1] - 2024-12-08
 
 ### Refactor
