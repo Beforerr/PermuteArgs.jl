@@ -1,5 +1,5 @@
 """
-    @permute_args function_name((arg1, Type1), (arg2, Type2), ...)
+    @permute_args function_name(arg1::Type1, arg2::Type2; kw...)
     @permute_args struct TypeName
         field1::Type1
         field2::Type2
@@ -9,7 +9,7 @@
 Generate multiple method definitions allowing arbitrary argument order based on types.
 
 For functions: Generates methods that accept arguments in any order based on their types.
-For structs: Generates constructors that accept fields in any order based on their types.
+For structs: Generates constructors and keyword constructors that accept fields in any order based on their types.
 
 # Examples
 ```julia
@@ -23,14 +23,14 @@ test("hello", 42) # Returns: 47
 
 # Struct usage
 @permute_args struct Point
-    x::Float64
+    x::Int
     y::Float64
     label::String
 end
 
 # Create instances with fields in any order
-p1 = Point(1.0, 2.0, "label")
-p2 = Point(label="A", x=1.0, y=2.0)
+p1 = Point(2.0, 1, "A")
+p2 = Point(label="A", x=1, y=2.0)
 ```
 """
 macro permute_args(expr)
