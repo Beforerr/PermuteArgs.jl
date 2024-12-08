@@ -21,6 +21,7 @@ Pkg.add("PermuteArgs")
 ## Features
 
 - Supports both multi-line and one-line function definitions
+- Supports struct definitions with permutable fields
 - Handles keyword arguments
 - Maintains type safety
 - Generates all possible permutations of argument orders
@@ -29,7 +30,7 @@ Pkg.add("PermuteArgs")
 
 ### Using the Macro
 
-The `@permute_args` macro allows you to define functions where arguments can be provided in any order, as long as their types match the function signature:
+The `@permute_args` macro allows you to define functions and structs where arguments/fields can be provided in any order, as long as their types match the signature:
 
 ```julia
 using PermuteArgs
@@ -42,6 +43,16 @@ end
 # Call the function with arguments in any order
 test_func(42, "hello")      # Returns: "x=42, y=hello"
 test_func("hello", 42)      # Returns: "x=42, y=hello"
+
+# Define a struct with permutable fields
+@permute_args struct TestStruct
+    x::Int
+    y::String
+end
+
+# Create struct instances with fields in any order
+TestStruct(42, "hello")      # TestStruct(42, "hello")
+TestStruct("hello", 42)      # TestStruct(42, "hello")
 ```
 
 ### Using the Function

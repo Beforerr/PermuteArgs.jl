@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2024-12-08
+
+### Feat
+
+- Add support for struct definitions in `@permute_args` macro
+
 ## [1.1.0] - 2024-11-20
 
 ### Doc
