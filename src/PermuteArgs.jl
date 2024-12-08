@@ -1,7 +1,7 @@
 module PermuteArgs
 
 using Combinatorics: permutations
-using Expronicon
+using ExproniconLite
 
 export @permute_args, permute_args, permute_args!
 include("core.jl")
