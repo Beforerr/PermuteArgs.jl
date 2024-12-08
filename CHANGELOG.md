@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [1.2.1] - 2024-12-08
+
+### Refactor
+
+- Use Expronicon to generate function expression
+
+### Perf
+
+- Use ExproniconLite instead of Expronicon
+
 ## [1.2.0] - 2024-12-08
 
 ### Feat
