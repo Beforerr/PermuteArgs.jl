@@ -18,7 +18,7 @@ function parse_function_signature(expr::Expr)
         param_expr = nothing
         arg_exprs = args[2:end]
     end
-    return func_name, parse_args(arg_exprs), param_expr
+    return func_name, arg_exprs, param_expr
 end
 
 function parse_args(args)
@@ -31,6 +31,9 @@ end
 method_argnames(m::Method) = Base.method_argnames(m)[2:end]
 method_argtypes(m::Method) = m.sig.types[2:end]
 method_args(m::Method) = (method_argnames(m), method_argtypes(m))
+
+compose_args_expr(argnames, argtypes) = [:($n::$t) for (n, t) in zip(argnames, argtypes)]
+compose_args_expr(m::Method) = compose_args_expr(method_argnames(m), method_argtypes(m))
 
 """
     method_kwargs(m::Method)
@@ -48,28 +51,28 @@ end
 
 function parse_function_signature(m::Method)
     func_name = m.name
-    args = method_args(m)
-    kw_args = method_kwargs(m)
-    return func_name, args, kw_args
+    args = compose_args_expr(m)
+    kwargs = method_kwargs(m)
+    return func_name, args, kwargs
 end
 
 function parse_function_signature(f::Function; types=nothing)
     func_name = nameof(f)
     m = isnothing(types) ? methods(f)[1] : which(f, types)
-    args = method_args(m)
-    kw_args = method_kwargs(m)
-    return func_name, args, kw_args
+    args = compose_args_expr(m)
+    kwargs = method_kwargs(m)
+    return func_name, args, kwargs
 end
 
 function split_struct_body(expr)
-    # Extract field names and types
-    field_names = []
-    field_types = []
-    for field in expr.args
-        if field isa Expr && field.head == :(::)
-            push!(field_names, field.args[1])
-            push!(field_types, field.args[2])
-        end
-    end
+    return filter(is_field, expr.args)
+end
+
+"""
+Extract field names and types
+"""
+function split_field(expr)
+    field_names = [f.args[1] for f in expr]
+    field_types = [f.args[2] for f in expr]
     return field_names, field_types
 end

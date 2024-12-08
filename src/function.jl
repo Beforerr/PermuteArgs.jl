@@ -1,16 +1,23 @@
+function JLCall(f, args; kw=nothing)
+    # body = Expr(:call, f, kwargs, arg_names...)
+    quote
+        $f($(args...); kw...)
+    end
+end
+
 function generate_permuted_methods(f::Function; types=nothing, perms=nothing)
-    func_name, (arg_names, arg_types), _ = parse_function_signature(f; types)
-    kw_args = Expr(:parameters, :(kw...))
-    func_body = Expr(:call, f, kw_args, arg_names...)
-    return generate_permuted_methods(func_name, arg_names, arg_types, func_body; perms, kw_args)
+    name, args, _ = parse_function_signature(f; types)
+    kwargs = [:(kw...)]
+    body = JLCall(f, args)
+    return generate_permuted_methods(args; name, perms, body, kwargs)
 end
 
 function generate_permuted_methods(m::Method; perms=nothing)
-    func_name, (arg_names, arg_types), _ = parse_function_signature(m)
+    name, args, _ = parse_function_signature(m)
     func = get_method_func(m)
-    kw_args = Expr(:parameters, :(kw...))
-    func_body = Expr(:call, func, kw_args, arg_names...)
-    return generate_permuted_methods(func_name, arg_names, arg_types, func_body; perms, kw_args)
+    kwargs = [:(kw...)]
+    body = JLCall(func, args)
+    return generate_permuted_methods(args; name, perms, body, kwargs)
 end
 
 """

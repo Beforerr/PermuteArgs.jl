@@ -34,21 +34,11 @@ p2 = Point(label="A", x=1.0, y=2.0)
 ```
 """
 macro permute_args(expr)
-    # Handle function, assignment, and struct expressions
-    @assert expr.head in (:(=), :function, :struct) "Expression must be a function or struct definition"
-
     if expr.head == :struct
         return generate_permutable_struct(expr) |> esc
+    elseif expr.head in (:(=), :function)
+        return generate_permuted_methods(expr) |> esc
+    else
+        throw(SyntaxError("expect a function or struct definition"))
     end
-
-    # Original function handling
-    func_sig = expr.args[1]
-    func_body = expr.args[2]
-
-    # Extract function name and arguments
-    func_name, args, kw_args = parse_function_signature(func_sig)
-
-    # Generate all methods using the shared helper function
-    methods = generate_permuted_methods(func_name, args..., func_body; kw_args)
-    return Expr(:block, methods...) |> esc
 end
