@@ -9,7 +9,7 @@ ExproniconLite = "55351af7-c7e9-48d6-89ff-24e801d99491"
 
 [compat]
 Combinatorics = "1"
-ExproniconLite = "0.10.13"
+ExproniconLite = "0.10.14"
 julia = "1.10"
 
 [extras]

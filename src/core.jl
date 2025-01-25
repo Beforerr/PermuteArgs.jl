@@ -1,21 +1,5 @@
 codegen_ast_func(; kw...) = codegen_ast(JLFunction(; kw...))
-
-struct JLCall
-    func
-    args::Vector
-    kwargs::Union{Nothing,Vector}
-end
-
-JLCall(; func, args, kwargs) = JLCall(func, args, kwargs)
-
-function codegen_ast_call(x::JLCall)
-    call = Expr(:call, x.func)
-    isnothing(x.kwargs) || push!(call.args, Expr(:parameters, x.kwargs...))
-    append!(call.args, x.args)
-    return call
-end
-
-codegen_ast_call(; kw...) = codegen_ast_call(JLCall(; kw...))
+codegen_ast_call(; kw...) = codegen_ast(JLCall(; kw...))
 
 function generate_permuted_methods(args; perms=nothing, kw...)
     perms = something(perms, permutations(1:length(args)))
