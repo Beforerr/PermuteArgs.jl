@@ -1,9 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.2] - 2025-04-21
 
 ### Refactor
 
+- Use JLCall from Expronicon
 - Use JLCall to generate call expr, which is a more robust way
 
 ## [1.2.1] - 2024-12-08
