@@ -50,3 +50,10 @@ end
           permuted_func("hello", 42, 3.14) ==
           test_func_for_method(42, 3.14, "hello")
 end
+
+@testset "Function with keyword arguments (local)" begin
+    local_func(x::Int, y::String) = (x, y)
+    permuted_func = permute_args(local_func)
+    @test permuted_func("hello", 42) == permuted_func(42, "hello") == local_func(42, "hello")
+    @test_throws MethodError local_func("hello", 42)
+end

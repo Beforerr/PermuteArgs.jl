@@ -5,6 +5,15 @@ function generate_permuted_methods(func::Function; types=nothing, perms=nothing)
     return generate_permuted_methods(args; name, perms, body, kwargs)
 end
 
+function generate_inplace_permuted_methods(@nospecialize(f); types, perms=nothing)
+    _, args, _ = parse_function_signature(f; types)
+    receiver = gensym(nameof(f))
+    name = :($(receiver)::$(typeof(f)))
+    kwargs = [:(kw...)]
+    body = codegen_ast_call(; func=receiver, args, kwargs)
+    return generate_permuted_methods(args; name, perms, body, kwargs)
+end
+
 function generate_permuted_methods(m::Method; perms=nothing)
     name, args, _ = parse_function_signature(m)
     func = get_method_func(m)
@@ -81,7 +90,8 @@ Note: This function modifies the method table. Use with caution in production co
 """
 function permute_args!(@nospecialize(f), types)
     perms = collect(permutations(1:length(types)))[2:end]
-    methods = generate_permuted_methods(f; types, perms)
+    methods = generate_inplace_permuted_methods(f; types, perms)
     mod = parentmodule(f, types)
-    return Base.eval(mod, Expr(:block, methods...))
+    Base.eval(mod, Expr(:block, methods...))
+    return f
 end
