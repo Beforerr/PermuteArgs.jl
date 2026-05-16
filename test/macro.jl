@@ -1,31 +1,23 @@
 @testset "Basic usage" begin
-    @permute_args function test_func(x::Int, y::String)
-        return "x=$x, y=$y"
-    end
-    # Test normal order
-    @test test_func(42, "hello") == "x=42, y=hello"
-    # Test reversed order
-    @test test_func("hello", 42) == "x=42, y=hello"
-    # Test type errors
+    @permute_args test_func(x::Int, y::String) = (x, y)
+    @test test_func(42, "hello") == test_func("hello", 42) == (42, "hello")
+    @test length(methods(test_func)) == 2
+
     @test_throws MethodError test_func(1.0, "hello")  # Wrong type for x
     @test_throws MethodError test_func("hello", "world")  # Wrong type for y
-    # Test that both methods exist
-    @test length(methods(test_func)) == 2
 end
 
 @testset "Function with keyword arguments" begin
-    @permute_args function keyword_func(x::Int, y::String; z=3.14)
+    @permute_args function keyword_func(x::Int, y::String; z = 3.14)
         return "x=$x, y=$y, z=$z"
     end
     @test keyword_func(42, "hello") == "x=42, y=hello, z=3.14"
-    @test keyword_func("hello", 42, z=2.71) == "x=42, y=hello, z=2.71"
-    @test keyword_func("hello", 42; z=520.0) == "x=42, y=hello, z=520.0"
+    @test keyword_func("hello", 42, z = 2.71) == "x=42, y=hello, z=2.71"
+    @test keyword_func("hello", 42; z = 520.0) == "x=42, y=hello, z=520.0"
 end
 
 @testset "Function with subtype arguments" begin
-    @permute_args function subtype_func(x::Int, y::Real)
-        return "x=$x, y=$y"
-    end
+    @permute_args subtype_func(x::Int, y::Real) = "x=$x, y=$y"
     @test subtype_func(42, 3.14) == "x=42, y=3.14"
     @test subtype_func(42.0, 3) == "x=3, y=42.0"
     @test_throws MethodError subtype_func(42, 3)
@@ -46,7 +38,7 @@ end
 
     # Test permuted field order and keyword constructor
     p2 = Point("A", 2.0, 1)
-    p3 = Point(label="A", y=2.0, x=1)
+    p3 = Point(label = "A", y = 2.0, x = 1)
     @test p3 == p2 == p1
 
     # Test type errors

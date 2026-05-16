@@ -11,9 +11,3 @@ ExproniconLite = "55351af7-c7e9-48d6-89ff-24e801d99491"
 Combinatorics = "1"
 ExproniconLite = "0.10.14"
 julia = "1.10"
-
-[extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test"]
