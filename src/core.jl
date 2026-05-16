@@ -30,7 +30,7 @@ Generate a struct definition with constructors that allow fields in any order.
 function generate_permutable_struct(expr)
     # Extract struct name and fields
     ismutable, name, typevars, supertype, body = split_struct(expr)
-    fields = split_struct_body(body)
+    fields = filter(is_field, body.args)
 
     body = codegen_ast_call(; func=name, args=fields)
 
