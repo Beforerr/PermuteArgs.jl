@@ -2,75 +2,41 @@
 
 [![Build Status](https://github.com/Beforerr/PermuteArgs.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/Beforerr/PermuteArgs.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
-A Julia package that provides tools for creating functions with permutable arguments:
-- `@permute_args`: Macro to define functions with permutable arguments
-- `permute_args`: Function to create a new function with permutable arguments
-- `permute_args!`: Function to add permuted methods to an existing function
+`@permute_args` macro helps define functions with permutable arguments and structs with permutable fields. No runtime overhead.
 
-`@permute_args` is recommended over `permute_args` and `permute_args!` as it comes with no runtime overhead.
-
-## Installation
-
-You can install PermuteArgs using Julia's package manager:
+## Quick Start
 
 ```julia
-using Pkg
-Pkg.add("PermuteArgs")
-```
+using Pkg; Pkg.add("PermuteArgs")
 
-## Features
-
-- Supports both multi-line and one-line function definitions
-- Supports struct definitions with permutable fields
-- Handles keyword arguments
-- Maintains type safety
-- Generates all possible permutations of argument orders
-
-## Usage
-
-### Using the Macro
-
-The `@permute_args` macro allows you to define functions and structs where arguments/fields can be provided in any order, as long as their types match the signature:
-
-```julia
 using PermuteArgs
 
-# Define a function with permutable arguments
-@permute_args function test_func(x::Int, y::String)
-    return "x=$x, y=$y"
-end
+@permute_args test_func(x::Int, y::String) = "x=$x, y=$y"
 
-# Call the function with arguments in any order
-test_func(42, "hello")      # Returns: "x=42, y=hello"
-test_func("hello", 42)      # Returns: "x=42, y=hello"
+test_func(42, "hello") == test_func("hello", 42) == "x=42, y=hello"
 
-# Define a struct with permutable fields
 @permute_args struct TestStruct
     x::Int
     y::String
 end
 
-# Create struct instances with fields in any order
-TestStruct(42, "hello")      # TestStruct(42, "hello")
-TestStruct("hello", 42)      # TestStruct(42, "hello")
+TestStruct(42, "hello") == TestStruct("hello", 42)
 ```
 
-### Using the Function
+## Features
 
-The `permute_args` function creates a new function that accepts permuted arguments:
+- Handles keyword arguments
+- Generates all possible permutations of argument orders
+
+## Other Usage
+
+### `permute_args(f)` to create a new function with permutable arguments
 
 ```julia
-# Define base function
-function base_func(x::Int, y::String)
-    return "x=$x, y=$y"
-end
+test(x::Int, y::String) = "x=$x, y=$y"
 
-# Create permutable version
-permuted_func = permute_args(base_func, [Int, String])
-
-# Call with different argument orders
-permuted_func(42, "hello")      # Returns: "x=42, y=hello"
-permuted_func("hello", 42)      # Returns: "x=42, y=hello"
+permuted_test = permute_args(test, [Int, String])
+permuted_test(42, "hello") == permuted_test("hello", 42)
 ```
 
 Type arguments can be omitted and the first method of the function will be used instead.
@@ -79,48 +45,12 @@ Type arguments can be omitted and the first method of the function will be used 
 permuted_func = permute_args(base_func)
 ```
 
-### Modifying Existing Functions
-
-The `permute_args!` function adds permuted methods to an existing function:
+### `permute_args!(f)` to add permuted methods to an existing function
 
 ```julia
-# Define base function
-function test(x::Int, y::String)
-    return "x=$x, y=$y"
-end
 
-# Add permuted methods
 permute_args!(test, [Int, String])
-
-# Now can call with different argument orders
-test(42, "hello")      # Returns: "x=42, y=hello"
-test("hello", 42)      # Returns: "x=42, y=hello"
-```
-
-### With Keyword Arguments
-
-The macro also supports functions with keyword arguments:
-
-```julia
-@permute_args function keyword_func(x::Int, y::String; z::Float64=3.14)
-    return "x=$x, y=$y, z=$z"
-end
-
-# Call with default keyword argument
-keyword_func(42, "hello")                 # Returns: "x=42, y=hello, z=3.14"
-keyword_func("hello", 42)                 # Returns: "x=42, y=hello, z=3.14"
-
-# Call with specified keyword argument
-keyword_func(42, "hello", z=2.71)         # Returns: "x=42, y=hello, z=2.71"
-keyword_func("hello", 42, z=2.71)         # Returns: "x=42, y=hello, z=2.71"
-```
-
-### One-line Function Definitions
-
-The macro works with both multi-line and one-line function definitions:
-
-```julia
-@permute_args one_line_func(x::Int, y::String) = "x=$x, y=$y"
+test(42, "hello") == test("hello", 42)
 ```
 
 ## Error Handling
