@@ -48,12 +48,3 @@ permuted_func = permute_args(base_func)
 permute_args!(test, [Int, String])
 test(42, "hello") == test("hello", 42)
 ```
-
-## Error Handling
-
-The package maintains Julia's type safety. Attempting to call a function with incorrect types will raise a `MethodError`:
-
-```julia
-test_func(1.0, "hello")      # Throws MethodError: wrong type for x
-test_func("hello", "world")  # Throws MethodError: wrong type for y
-```

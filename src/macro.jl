@@ -39,6 +39,6 @@ macro permute_args(expr)
     elseif expr.head in (:(=), :function)
         return generate_permuted_methods(expr) |> esc
     else
-        throw(SyntaxError("expect a function or struct definition"))
+        throw(SyntaxError("expected function or struct definition, got $(expr)", __source__))
     end
 end

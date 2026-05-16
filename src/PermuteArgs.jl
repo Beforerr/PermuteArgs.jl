@@ -2,6 +2,7 @@ module PermuteArgs
 
 using Combinatorics: permutations
 using ExproniconLite
+using ExproniconLite: SyntaxError
 
 export @permute_args, permute_args, permute_args!
 include("core.jl")
