@@ -1,32 +1,11 @@
 inverse_permutation(p) = ntuple(i -> findfirst(==(i), p), length(p))
 
-"""
-    parse_function_signature(expr::Expr)
-    parse_function_signature(m::Method)
-    parse_function_signature(f::Function; types=nothing)
-
-Helper function to extract function name, arguments (names and types), and keyword arguments from a function definition expression.
-"""
-function parse_function_signature(expr::Expr)
-    args = expr.args
-    func_name = args[1]
-    # Handle keyword arguments if present
-    if args[2].head == :parameters
-        param_expr = args[2]
-        arg_exprs = args[3:end]
-    else
-        param_expr = nothing
-        arg_exprs = args[2:end]
-    end
-    return func_name, arg_exprs, param_expr
-end
-
 method_argnames(m::Method) = Base.method_argnames(m)[2:end]
 method_argtypes(m::Method) = m.sig.types[2:end]
 method_args(m::Method) = (method_argnames(m), method_argtypes(m))
 
 compose_args_expr(argnames, argtypes) = [:($n::$t) for (n, t) in zip(argnames, argtypes)]
-compose_args_expr(m::Method) = compose_args_expr(method_argnames(m), method_argtypes(m))
+compose_args_expr(m::Method) = compose_args_expr(method_args(m)...)
 
 """
     method_kwargs(m::Method)
@@ -42,6 +21,7 @@ function get_method_func(m::Method)
     return m.sig.types[1].instance
 end
 
+# Helper function to extract function name, arguments (names and types), and keyword arguments from a function definition expression
 function parse_function_signature(m::Method)
     func_name = m.name
     args = compose_args_expr(m)
