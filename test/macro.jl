@@ -1,8 +1,10 @@
 @testset "Basic usage" begin
+    using PermuteArgs: SyntaxError
     @permute_args test_func(x::Int, y::String) = (x, y)
     @test test_func(42, "hello") == test_func("hello", 42) == (42, "hello")
     @test length(methods(test_func)) == 2
 
+    @test_throws SyntaxError (@macroexpand @permute_args test_func(42, "hello"))
     @test_throws MethodError test_func(1.0, "hello")  # Wrong type for x
     @test_throws MethodError test_func("hello", "world")  # Wrong type for y
 end

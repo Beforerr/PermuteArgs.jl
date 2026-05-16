@@ -1,5 +1,3 @@
-inverse_permutation(p) = ntuple(i -> findfirst(==(i), p), length(p))
-
 method_argnames(m::Method) = Base.method_argnames(m)[2:end]
 method_argtypes(m::Method) = m.sig.types[2:end]
 method_args(m::Method) = (method_argnames(m), method_argtypes(m))
