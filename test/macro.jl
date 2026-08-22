@@ -47,3 +47,29 @@ end
     @test_throws MethodError Point("D", "E", 1.0)
     @test_throws MethodError Point(1.0, "D", 2.0)
 end
+
+@testset "Lazy option" begin
+    @permute_args lazy lazy_func(x::Int, y::String; z = 1) = (x, y, z)
+    @test lazy_func(42, "hello") == lazy_func("hello", 42) == (42, "hello", 1)
+    @test lazy_func("hello", 42; z = 2) == (42, "hello", 2)
+    @test length(methods(lazy_func)) == 2  # canonical + dispatcher, not n!
+    @test_throws MethodError lazy_func(1.0, "hello")
+
+    @permute_args lazy = false eager_func(x::Int, y::String) = (x, y)
+    @test eager_func("hello", 42) == (42, "hello")
+
+    @permute_args lazy struct LazyPoint
+        x::Int
+        y::Float64
+        label::String
+    end
+    @test LazyPoint("A", 2.0, 1) == LazyPoint(1, 2.0, "A") == LazyPoint(label = "A", y = 2.0, x = 1)
+    @test_throws MethodError LazyPoint("D", "E", 1.0)
+
+    # Ambiguous signatures cannot be permuted, in either mode
+    @permute_args lazy dup_lazy(x::Int, y::Int) = x - y
+    @permute_args dup_eager(x::Int, y::Int) = x - y
+    @test dup_lazy(3, 1) == dup_eager(3, 1) == 2
+
+    @test_throws SyntaxError (@macroexpand @permute_args bogus f(x::Int) = x)
+end

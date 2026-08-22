@@ -89,7 +89,7 @@ test("hello", 42)      # Returns: "x=42, y=hello"
 Note: This function modifies the method table. Use with caution in production code.
 """
 function permute_args!(@nospecialize(f), types)
-    perms = collect(permutations(1:length(types)))[2:end]
+    perms = distinct_perms(types)
     methods = generate_inplace_permuted_methods(f; types, perms)
     mod = parentmodule(f, types)
     Base.eval(mod, Expr(:block, methods...))

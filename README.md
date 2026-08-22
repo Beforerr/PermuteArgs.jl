@@ -24,6 +24,25 @@ end
 TestStruct(42, "hello") == TestStruct("hello", 42)
 ```
 
+## `lazy`: constant definition time
+
+`lazy` replaces the `n!` permuted methods with one `Vararg{Union{...}}` dispatcher, compiling each
+argument order on first call instead. Same runtime; worth it from ~5 arguments up.
+
+```julia
+@permute_args lazy function big(a::Int, b::Float64, c::String, d::Char, e::Bool, f::UInt8)
+    return (a, b, c, d, e, f)
+end
+```
+
+Definition plus one call:
+
+| n | eager | lazy |
+| - | ----- | ---- |
+| 5 | 120 methods, 31 ms | 2 methods, 11 ms |
+| 6 | 720 methods, 199 ms | 2 methods, 12 ms |
+| 7 | 5040 methods, 1531 ms | 2 methods, 12 ms |
+
 ## Other Usage
 
 ### `permute_args(f)` to create a new function with permutable arguments
