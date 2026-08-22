@@ -9,5 +9,6 @@ include("core.jl")
 include("macro.jl")
 include("function.jl")
 include("utils.jl")
+include("precompile.jl")
 
 end

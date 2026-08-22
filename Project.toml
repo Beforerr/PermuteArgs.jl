@@ -9,8 +9,10 @@ projects = ["test"]
 [deps]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
 ExproniconLite = "55351af7-c7e9-48d6-89ff-24e801d99491"
+PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
 
 [compat]
 Combinatorics = "1"
 ExproniconLite = "0.10.14"
+PrecompileTools = "1"
 julia = "1.10"
