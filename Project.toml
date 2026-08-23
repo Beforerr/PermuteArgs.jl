@@ -1,6 +1,6 @@
 name = "PermuteArgs"
 uuid = "9536dbe3-0ca9-4073-961c-7241c6d3471f"
-version = "1.2.3"
+version = "1.2.4"
 authors = ["Beforerr <zzj956959688@gmail.com> and contributors"]
 
 [workspace]
